@@ -25,8 +25,7 @@ nc_dl:
 	rm ${BIN_DIR}/ncurses.tar.gz
 
 nc_build:
-	${NC_ROOT_DIR}/configure
-	make -C ${NC_ROOT_DIR}
+	pushd ${NC_ROOT_DIR} && ./configure && make && popd
 
 bin_dir:
 	mkdir ${BIN_DIR}
