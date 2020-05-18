@@ -4,6 +4,7 @@ LDFLAGS=-fsanitize=address
 
 ROOT_DIR=.
 BIN_DIR=${ROOT_DIR}/bin
+OBJ_DIR=${ROOT_DIR}/obj
 
 NC_ROOT_DIR=${BIN_DIR}/ncurses-6.2
 NC_LIB_DIR=${NC_ROOT_DIR}/lib 		#For statically linking with ncurses.
@@ -19,14 +20,15 @@ build: graph.o
 
 bin_dir:
 	mkdir ${BIN_DIR}
+	mkdir ${OBJ_DIR}
 
 #SPECIFIC TARGETS
 
 dstructures.o:
-	gcc -c ${CFLAGS} dstructures.c -o ${BIN_DIR}/dstructures.o ${LDFLAGS}
+	gcc -c ${CFLAGS} dstructures.c -o ${OBJ_DIR}/dstructures.o ${LDFLAGS}
 
 graph.o: dstructures.o
-	gcc -c ${CFLAGS} graph.c -o ${BIN_DIR}/graph.o ${LDFLAGS}
+	gcc -c ${CFLAGS} graph.c -o ${OBJ_DIR}/graph.o ${LDFLAGS}
 
 #UTILITY FOR DOWNLOADING AND COMPILING NCURSES. STATICALLY LINKED.
 ncurses: bin_dir nc_dl nc_build
