@@ -8,14 +8,27 @@ BIN_DIR=${ROOT_DIR}/bin
 NC_ROOT_DIR=${BIN_DIR}/ncurses-6.2
 NC_LIB_DIR=${NC_ROOT_DIR}/lib 		#For statically linking with ncurses.
 
-all:
+#GENERAL TARGETS
+all: clean bin_dir build
 
 clean:
 	rm -rf ${BIN_DIR} || true
 
-build:
+build: graph.o
 	#gcc ${CFLAGS} *.c ${LDFLAGS} -L ${NC_LIB_DIR}
 
+bin_dir:
+	mkdir ${BIN_DIR}
+
+#SPECIFIC TARGETS
+
+dstructures.o:
+	gcc -c ${CFLAGS} dstructures.c -o ${BIN_DIR}/dstructures.o ${LDFLAGS}
+
+graph.o: dstructures.o
+	gcc -c ${CFLAGS} graph.c -o ${BIN_DIR}/graph.o ${LDFLAGS}
+
+#UTILITY FOR DOWNLOADING AND COMPILING NCURSES. STATICALLY LINKED.
 ncurses: bin_dir nc_dl nc_build
 
 nc_dl:
@@ -26,7 +39,4 @@ nc_dl:
 
 nc_build:
 	pushd ${NC_ROOT_DIR} && ./configure && make && popd
-
-bin_dir:
-	mkdir ${BIN_DIR}
 
