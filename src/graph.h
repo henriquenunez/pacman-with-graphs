@@ -41,6 +41,8 @@ void insert_edge_graph(GRAPH*, PAIR source, PAIR destination);
 
 //BFS from origin to destination, fillig the distance on every iteration
 void BFS_fill_distance_graph(GRAPH*, PAIR source, PAIR destination);
+void BFS_reset_distance_graph(GRAPH*);
+
 int value_at_vertex_graph(GRAPH*, PAIR source);
 
 #endif

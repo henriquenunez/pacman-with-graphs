@@ -145,8 +145,6 @@ void BFS_fill_distance_graph(GRAPH* this_graph, PAIR source, PAIR destination)
 
     vertex_queue = create_queue();
 
-    dist_counter = 0;  //Distance counter
-
     V_MAT[source.first][source.second].visited = true; //Mark as visited
     pair_pointer = current_vertex_pair = create_pair;
     current_vertex_pair->first = source.first;
@@ -161,8 +159,8 @@ void BFS_fill_distance_graph(GRAPH* this_graph, PAIR source, PAIR destination)
 	{
 	    break;
 	}
-	dist_counter++;
-	printf("Current distance: %u\n", dist_counter);
+	dist_counter = V_MAT[current_vertex_pair->first]
+				    [current_vertex_pair->second].value;
 	while ((temp_child_vertex_pair = (PAIR*) iter_list(
 			    V_MAT[current_vertex_pair->first]
 				    [current_vertex_pair->second].adj_list
@@ -172,10 +170,6 @@ void BFS_fill_distance_graph(GRAPH* this_graph, PAIR source, PAIR destination)
 	    if (V_MAT[temp_child_vertex_pair->first]
 			    [temp_child_vertex_pair->second].visited) continue;
 
-	    printf("C: (%d,%d)\n", temp_child_vertex_pair->first,
-					    temp_child_vertex_pair->second);
-
-
 	    //Mark vertex as visited.
 	    V_MAT[temp_child_vertex_pair->first]
 			    [temp_child_vertex_pair->second].visited = true;
@@ -183,12 +177,10 @@ void BFS_fill_distance_graph(GRAPH* this_graph, PAIR source, PAIR destination)
 	    //Insert distance into vertex.
 	    V_MAT[temp_child_vertex_pair->first]
 			    [temp_child_vertex_pair->second].value =
-								dist_counter;
+								dist_counter +1;
 
 	    en_queue(vertex_queue, temp_child_vertex_pair);
 	}
-	/*printf("List of vertex (%d,%d) over.\n", current_vertex_pair->first,
-						 current_vertex_pair->second);*/
     }
 
     /* Here, there's no need to free the vertexes in queue, since they are being
@@ -201,13 +193,14 @@ void BFS_fill_distance_graph(GRAPH* this_graph, PAIR source, PAIR destination)
 
 }
 
-void BFS_reset_visits_graph(GRAPH* this_graph)
+void BFS_reset_distance_graph(GRAPH* this_graph)
 {
     //ATTENTION: NOT READY
     for (int i = 0 ; i < this_graph->row_number ; i++)
 	for (int j = 0 ; j < this_graph->col_number ; j++)
 	{
 	    V_MAT[i][j].visited = false;
+	    V_MAT[i][j].value = 0;
 	}
 }
 

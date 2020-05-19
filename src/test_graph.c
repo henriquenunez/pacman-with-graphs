@@ -67,11 +67,79 @@ int main()
 
     source.first = 0; source.second = 0;
     destination.first = (int) ROWS / 2; destination.second = (int) COLS / 2;
+    printf("Source:	    (%d,%d)\n", source.first, source.second);
+    printf("Destination:    (%d,%d)\n", destination.first, destination.second);
 
     //Testing BFS
     BFS_fill_distance_graph(a_graph, source, destination);
 
     printf("After BFS:\n");
+
+    printf("    ");
+    for (int j = 0 ; j < COLS ; j++)
+	printf("%3d ", j);
+    printf("\n");
+
+    for (int i = 0 ; i < ROWS ; i++)
+    {
+	printf("%3d:", i);
+	for (int j = 0 ; j < COLS ; j++)
+	{
+	    source.first = i; source.second = j;
+	    printf("%3d ", value_at_vertex_graph(a_graph, source));
+	}
+	printf("\n");
+    }
+
+    //Cleaning BFS
+    BFS_reset_distance_graph(a_graph);
+    printf("After BFS clean:\n");
+
+    printf("    ");
+    for (int j = 0 ; j < COLS ; j++)
+	printf("%3d ", j);
+    printf("\n");
+
+    for (int i = 0 ; i < ROWS ; i++)
+    {
+	printf("%3d:", i);
+	for (int j = 0 ; j < COLS ; j++)
+	{
+	    source.first = i; source.second = j;
+	    printf("%3d ", value_at_vertex_graph(a_graph, source));
+	}
+	printf("\n");
+    }
+
+    source.first = 2; source.second = 2;
+    destination.first = 3; destination.second = 6;
+    printf("Source:	    (%d,%d)\n", source.first, source.second);
+    printf("Destination:    (%d,%d)\n", destination.first, destination.second);
+
+    //Testing BFS
+    BFS_fill_distance_graph(a_graph, source, destination);
+
+    printf("After BFS:\n");
+
+    printf("    ");
+    for (int j = 0 ; j < COLS ; j++)
+	printf("%3d ", j);
+    printf("\n");
+
+    for (int i = 0 ; i < ROWS ; i++)
+    {
+	printf("%3d:", i);
+	for (int j = 0 ; j < COLS ; j++)
+	{
+	    source.first = i; source.second = j;
+	    printf("%3d ", value_at_vertex_graph(a_graph, source));
+	}
+	printf("\n");
+    }
+
+    //Cleaning BFS
+    BFS_reset_distance_graph(a_graph);
+    printf("After BFS clean:\n");
 
     printf("    ");
     for (int j = 0 ; j < COLS ; j++)

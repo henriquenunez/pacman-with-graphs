@@ -21,6 +21,7 @@ void delete_list(LIST*);
 //Appends generic element
 void append_element_list(LIST*, void*);
 void* remove_last_element_list(LIST*);
+void* remove_first_element_list(LIST*);
 void reset_iter_list();	//Resets iterator to beginning
 
 //Returns elements, if reached end, iterator is reset and NULL is returned

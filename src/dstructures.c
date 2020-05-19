@@ -79,23 +79,30 @@ void* remove_last_element_list(LIST* this_list)
 void* remove_first_element_list(LIST* this_list)
 {
     void* element;
-    void* temp_internal_array;
+    void** temp_internal_array;
 
     if (this_list->size <= 0) return NULL;
 
     element = this_list->internal_array[0];
     this_list->size--;
 
+    //printf("Array pointer before: %p\n", this_list->internal_array);
+
     //Copies internal array from the next element until end.
-    temp_internal_array = malloc(this_list->capacity * sizeof(void*));
+    temp_internal_array = (void**) malloc(this_list->capacity * sizeof(void*));
+    //printf("Temp pointer: %p\n", temp_internal_array);
+    //printf("Internal array offset: %p\n", this_list->internal_array + 1);
+
     memcpy(temp_internal_array,
-	    this_list->internal_array + sizeof(void*),
-	    this_list->size);
+	    this_list->internal_array + 1, //Next value
+	    this_list->size * sizeof(void*));
+    //printf("Size copy: %d\n", this_list->size);
 
     free(this_list->internal_array);
     //Repoints internal array to right place.
     this_list->internal_array = temp_internal_array;
 
+    //printf("Array pointer after: %p\n", this_list->internal_array);
     return element;
 }
 
@@ -149,6 +156,6 @@ void en_queue(QUEUE* this_queue, void* this_element)
 
 void* de_queue(QUEUE* this_queue)
 {
-    return remove_last_element_list(this_queue->internal_list);
+    return remove_first_element_list(this_queue->internal_list);
 }
 
