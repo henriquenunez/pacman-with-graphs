@@ -5,47 +5,101 @@
 
 #include "graph.h"
 
+// Game size
 #define WIDTH 30
 #define HEIGHT 15 
+
+// Game over size
+#define WIDTH_GAME_OVER 50
+#define HEIGHT_GAME_OVER 6 
+
+// Help size 
+#define WIDTH_HELP 18
+#define HEIGHT_HELP 11 
 
 // Curses colors
 #define GAME_COLOR_BLACK 1
 #define GAME_COLOR_BLUE 2
 #define GAME_COLOR_YELLOW 3
 #define GAME_COLOR_RED 4
+#define GAME_COLOR_GRAY 5
 
 // Curses pairs
 #define PAIR_BACKGROUND 1
 #define PAIR_WALL 2
 #define PAIR_PACMAN 3
 #define PAIR_GHOST 4
+#define PAIR_GAME_OVER 5
+#define PAIR_NUMBERS 6
+#define PAIR_HELP 7
 
 char game_template[HEIGHT][WIDTH] ={{"******************************"},
-					{"*             **             *"},
-					{"* **** *** ******** *** **** *"},
-					{"* *                        * *"},
-					{"* * **********  ********** * *"},
-					{"*                            *"},
-					{"***** ***** **  ** ***** *****"},
-					{"      *   * *    * *   *      "},
-					{"***** ***** ****** ***** *****"},
-					{"*                            *"},
-					{"* * **********  ********** * *"},
-					{"* *                        * *"},
-					{"* **** *** ******** *** **** *"},
-					{"*             **             *"},
-					{"******************************"}};
+									{"*             **             *"},
+									{"* **** *** ******** *** **** *"},
+									{"* *                        * *"},
+									{"* * **********  ********** * *"},
+									{"*                            *"},
+									{"***** ***** **  ** ***** *****"},
+									{"*     *   * *    * *   *     *"},
+									{"***** ***** ****** ***** *****"},
+									{"*                            *"},
+									{"* * **********  ********** * *"},
+									{"* *                        * *"},
+									{"* **** *** ******** *** **** *"},
+									{"*             **             *"},
+									{"******************************"}};
+
+//char game_template[HEIGHT][WIDTH+1] ={{"******************************"},
+//								   	  {"*                            *"},
+//								      {"*                            *"},
+//								   	  {"*                            *"},
+//								   	  {"*                            *"},
+//								   	  {"*                            *"},
+//								   	  {"*                            *"},
+//								   	  {"*                            *"},
+//								   	  {"*                            *"},
+//								   	  {"*                            *"},
+//								   	  {"*                            *"},
+//								   	  {"*                            *"},
+//								   	  {"*                            *"},
+//								   	  {"*                            *"},
+//								   	  {"******************************"}};
+
+
+char game_over[HEIGHT_GAME_OVER][WIDTH_GAME_OVER+1] = {{"  __ _  __ _ _ __ ___   ___    _____   _____ _ __ "},
+						 {" / _` |/ _` | '_ ` _ \\ / _ \\  / _ \\ \\ / / _ \\ '__|"},
+						 {"| (_| | (_| | | | | | |  __/ | (_) \\ V /  __/ |   "},
+						 {" \\__, |\\__,_|_| |_| |_|\\___|  \\___/ \\_/ \\___|_|   "},
+						 {"  __/ |                                           "},
+						 {" |___/                                            "}};
+
+
+char help_template[HEIGHT_HELP][WIDTH_HELP] = {{"----- HELP -----"},
+					  {"Move ghost:     "},
+					  {"       w        "},
+					  {"     a   d      "},
+					  {"       s        "},
+					  {"                "},
+					  {"Quit:           "},
+					  {"   <ESQ> or q   "},
+					  {"                "},
+					  {"Remember:       "},
+					  {" Losing is fun! "}};
+
+
 
 void setup_curses();
 GRAPH* create_game_graph();
 void draw_game(WINDOW *win, GRAPH *graph, PAIR pacman, PAIR ghost);
 void move_pacman(GRAPH *graph, PAIR *pacman, PAIR ghost);
 void move_ghost(GRAPH *graph, PAIR *ghost, PAIR pacman);
+void draw_game_over(WINDOW *win);
+void draw_help(WINDOW *win);
 
 int main(int argc, char *argv[]) {
 	//--- Initilize game variables ---//
 	char game_running = 1;
-	PAIR ghost = {WIDTH/2, HEIGHT/2};
+	PAIR ghost = {HEIGHT/2, WIDTH/2};
 	PAIR pacman = {1, 1};
 	GRAPH* graph = create_game_graph();
 
@@ -58,19 +112,32 @@ int main(int argc, char *argv[]) {
 	// Create window (posY, posX, offsetY, offsetX)
 	WINDOW *game  = newwin(HEIGHT, WIDTH, maxY/2-HEIGHT/2, maxX/2-WIDTH/2);
 	refresh();
+	//--- Create help window ---//
+	WINDOW *help_window  = newwin(HEIGHT_HELP, WIDTH_HELP, 0, 0);
+	refresh();
+	draw_help(help_window);
 
-	// Run game until pacman eat the ghost
+	//--- Run game until pacman eat the ghost ---//
+	BFS_fill_distance_graph(graph, ghost, pacman);
 	while(game_running)
 	{
 		draw_game(game, graph, pacman, ghost);
-		usleep(1*1000000);
+		usleep(0.1*1000000);
 
 		move_ghost(graph, &ghost, pacman);
 		move_pacman(graph, &pacman, ghost);
 
 		if(pacman.first == ghost.first && pacman.second == ghost.second)
 			game_running = 0;
+
 	}
+	draw_game(game, graph, pacman, ghost);
+
+	//--- Print game over ---//
+	WINDOW *game_over_window  = newwin(HEIGHT_GAME_OVER, WIDTH_GAME_OVER, maxY/2-HEIGHT_GAME_OVER/2-HEIGHT/2-3, maxX/2-WIDTH_GAME_OVER/2);
+	refresh();
+
+	draw_game_over(game_over_window);
 
 	// Destroy the window
 	endwin();
@@ -95,6 +162,7 @@ void setup_curses()
 
 	// Create colors
 	init_color(GAME_COLOR_BLACK, 200, 200, 200);
+	init_color(GAME_COLOR_GRAY, 300, 300, 300);
 	init_color(GAME_COLOR_RED, 1000, 0, 0);
 	init_color(GAME_COLOR_BLUE, 0, 0, 1000);
 	init_color(GAME_COLOR_YELLOW, 1000, 1000, 0);
@@ -104,6 +172,9 @@ void setup_curses()
 	init_pair(PAIR_WALL, GAME_COLOR_BLUE, GAME_COLOR_BLUE);	
 	init_pair(PAIR_PACMAN, GAME_COLOR_YELLOW, GAME_COLOR_BLACK);	
 	init_pair(PAIR_GHOST, GAME_COLOR_RED, GAME_COLOR_BLACK);	
+	init_pair(PAIR_GAME_OVER, GAME_COLOR_RED, GAME_COLOR_BLACK);	
+	init_pair(PAIR_NUMBERS, GAME_COLOR_GRAY, GAME_COLOR_BLACK);	
+	init_pair(PAIR_HELP, GAME_COLOR_YELLOW, GAME_COLOR_BLACK);	
 
 	// Set background color
 	bkgd(COLOR_PAIR(PAIR_BACKGROUND));
@@ -111,73 +182,25 @@ void setup_curses()
 
 GRAPH* create_game_graph()
 {
-	GRAPH *graph = create_graph(WIDTH,HEIGHT);
+	GRAPH *graph = create_graph(HEIGHT, WIDTH);
 	for(int x=0;x<WIDTH;x++)
 	{
 		for(int y=0;y<HEIGHT;y++)
 		{
-			PAIR curr = {x,y};
+			PAIR curr = {y, x};
 			if(game_template[y][x]=='*')
 				continue;
 
-			// Check top
-			if(y-1>0)
-			{
-				PAIR top = {x,y-1};
-				if(game_template[y-1][x]==' ')
-					insert_edge_graph(graph, curr, top);
-			}
-			else
-			{
-				// Connect top with bottom
-				PAIR top = {x,HEIGHT-1};
-				if(game_template[HEIGHT-1][x]==' ')
-					insert_edge_graph(graph, curr, top);
-			}
+			PAIR positions_to_link[4] = {{curr.first, (curr.second-1)%WIDTH}, // Left
+										{(curr.first+1)%HEIGHT, curr.second}, // Bottom
+										{curr.first, (curr.second+1)%WIDTH},  // Right
+										{(curr.first-1)%HEIGHT, curr.second}};// Top
 
-			// Check left
-			if(x-1>0)
+			for(int i=0;i<4;i++)
 			{
-				PAIR left = {x-1,y};
-				if(game_template[y][x-1]==' ')
-					insert_edge_graph(graph, curr, left);
-			}
-			else
-			{
-				// Connect right with left
-				PAIR left = {WIDTH-1,y};
-				if(game_template[y][WIDTH-1]==' ')
-					insert_edge_graph(graph, curr, left);
-			}
-			
-			// Check bottom
-			if(y+1<HEIGHT)
-			{
-				PAIR bottom = {x,y+1};
-				if(game_template[y+1][x]==' ')
-					insert_edge_graph(graph, curr, bottom);
-			}
-			else
-			{
-				// Connect top with bottom
-				PAIR bottom = {x,0};
-				if(game_template[0][x]==' ')
-					insert_edge_graph(graph, curr, bottom);
-			}
-			
-			// Check right
-			if(x+1<WIDTH)
-			{
-				PAIR right = {x+1,y};
-				if(game_template[y][x+1]==' ')
-					insert_edge_graph(graph, curr, right);
-			}
-			else
-			{
-				// Connect right with left
-				PAIR right = {0,y};
-				if(game_template[y][0]==' ')
-					insert_edge_graph(graph, curr, right);
+				PAIR pos_to_link = positions_to_link[i];
+				if(game_template[pos_to_link.first][pos_to_link.second]==' ')
+					insert_edge_graph(graph, curr, pos_to_link);
 			}
 		}
 	}
@@ -198,32 +221,35 @@ void draw_game(WINDOW *win, GRAPH *graph, PAIR pacman, PAIR ghost)
 		{
 			if(game_template[y][x]=='*')
 				mvwprintw(win, y, x, "*");
-
-			//mvwprintw(win, y, 0, "*");
-			//mvwprintw(win, y, WIDTH-1, "*");
-			//mvwprintw(win, 0, x, "*");
-			//mvwprintw(win, HEIGHT-1, x, "*"); 
 		}
 	}
 	wattr_off(win, COLOR_PAIR(PAIR_WALL), NULL);
 
 	// Draw graph 
-	wattr_on(win, COLOR_PAIR(PAIR_BACKGROUND), NULL);
-	for(x=0;x<WIDTH;x+=2)
+	wattr_on(win, COLOR_PAIR(PAIR_NUMBERS), NULL);
+	for(x=0;x<WIDTH;x++)
 	{
 		for(y=0;y<HEIGHT;y++)
 		{
-			//mvwprintw(win, y, x, " ");
+			if(game_template[y][x]!='*')
+			{
+				PAIR pair = {y,x};
+				int value = value_at_vertex_graph(graph, pair);
+				if(value<10)
+					mvwprintw(win, y, x, "%d",value);
+				else
+					mvwprintw(win, y, x, "%c",'a'+value-10);
+			}
 		}
 	}
-	wattr_off(win, COLOR_PAIR(PAIR_BACKGROUND), NULL);
+	wattr_off(win, COLOR_PAIR(PAIR_NUMBERS), NULL);
 
 	wattr_on(win, COLOR_PAIR(PAIR_GHOST), NULL);
-	mvwprintw(win, ghost.second, ghost.first, "g");
+	mvwprintw(win, ghost.first, ghost.second, "g");
 	wattr_off(win, COLOR_PAIR(PAIR_GHOST), NULL);
 
 	wattr_on(win, COLOR_PAIR(PAIR_PACMAN), NULL);
-	mvwprintw(win, pacman.second, pacman.first, "o");
+	mvwprintw(win, pacman.first, pacman.second, "o");
 	wattr_off(win, COLOR_PAIR(PAIR_PACMAN), NULL);
 	
 	// Refresh window 
@@ -232,21 +258,30 @@ void draw_game(WINDOW *win, GRAPH *graph, PAIR pacman, PAIR ghost)
 
 void move_pacman(GRAPH *graph, PAIR *pacman, PAIR ghost)
 {
-	BFS_fill_distance_graph(graph, *pacman, ghost);
+	BFS_reset_distance_graph(graph);
+	BFS_fill_distance_graph(graph, ghost, *pacman);
 	// Values getting bigger from ghost to pacman -> choose lower number
 	PAIR best_position = {-1,-1};
 	int best_bfs_value = WIDTH*HEIGHT;// Works like infinity
 	PAIR curr_checking;
 	int curr_bfs_value;
 
-	PAIR positions_to_check[4] = {{pacman->first, (pacman->second-1)%HEIGHT},// Top
-								{(pacman->first+1)%WIDTH, pacman->second},// Right
-								{pacman->first, (pacman->second+1)%HEIGHT},// Bottom
-								{(pacman->first-1)%WIDTH, pacman->second}};// Left
-
+	PAIR positions_to_check[4] = {{pacman->first, (pacman->second-1)%WIDTH},// Left
+								{(pacman->first+1)%HEIGHT, pacman->second},// Bottom
+								{pacman->first, (pacman->second+1)%WIDTH},// Right
+								{(pacman->first-1)%HEIGHT, pacman->second}};// Top
+	// Check best move
 	for(int i=0;i<4;i++)
 	{
 		curr_checking = positions_to_check[i];
+
+		// Check if can eat ghost
+		if(curr_checking.first==ghost.first && curr_checking.second==ghost.second)
+		{
+			best_position = curr_checking;
+			break;
+		}
+
 		curr_bfs_value = value_at_vertex_graph(graph, curr_checking);
 		if(curr_bfs_value!=0 && curr_bfs_value<best_bfs_value)
 		{
@@ -263,31 +298,100 @@ void move_pacman(GRAPH *graph, PAIR *pacman, PAIR ghost)
 
 void move_ghost(GRAPH *graph, PAIR *ghost, PAIR pacman)
 {
-	BFS_fill_distance_graph(graph, *ghost, pacman);
-	// Values getting bigger from pacman to ghost -> choose higher number
-	PAIR best_position = {-1,-1};
-	int best_bfs_value = 0;
-	PAIR curr_checking;
-	int curr_bfs_value;
+	//------------- Control ghost with BFS ------------//
+	//BFS_reset_distance_graph(graph);
+	//BFS_fill_distance_graph(graph, *ghost, pacman);
+	//// Values getting bigger from pacman to ghost -> choose higher number
+	//PAIR best_position = {-1,-1};
+	//int best_bfs_value = 0;
+	//PAIR curr_checking;
+	//int curr_bfs_value;
 
-	PAIR positions_to_check[4] = {{ghost->first, (ghost->second-1)%HEIGHT},// Top
-								{(ghost->first+1)%WIDTH, ghost->second},// Right
-								{ghost->first, (ghost->second+1)%HEIGHT},// Bottom
-								{(ghost->first-1)%WIDTH, ghost->second}};// Left
+	//PAIR positions_to_check[4] = {{ghost->first, (ghost->second-1)%WIDTH},// Left
+	//							{(ghost->first+1)%HEIGHT, ghost->second},// Top
+	//							{ghost->first, (ghost->second+1)%WIDTH},// Right
+	//							{(ghost->first-1)%HEIGHT, ghost->second}};// Bottom
 
-	for(int i=0;i<4;i++)
+	//for(int i=0;i<4;i++)
+	//{
+	//	curr_checking = positions_to_check[i];
+	//	curr_bfs_value = value_at_vertex_graph(graph, curr_checking);
+	//	if(curr_bfs_value!=0 && curr_bfs_value>best_bfs_value)
+	//	{
+	//		// Position is not an obstacle and is better than the best position
+	//		best_bfs_value = curr_bfs_value;
+	//		best_position = curr_checking;
+	//	}
+	//}
+
+	//// If some position to walk was found...
+	//if(best_position.first!=0)
+	//	*ghost = best_position;
+	//------------- Control ghost with keyboard ------------//
+	int moved = 0;
+	int key;
+	key = getch();
+	switch(key)
 	{
-		curr_checking = positions_to_check[i];
-		curr_bfs_value = value_at_vertex_graph(graph, curr_checking);
-		if(curr_bfs_value!=0 && curr_bfs_value>best_bfs_value)
-		{
-			// Position is not an obstacle and is better than the best position
-			best_bfs_value = curr_bfs_value;
-			best_position = curr_checking;
-		}
+		case 'w':
+			if(game_template[(ghost->first-1)%HEIGHT][ghost->second]!='*')
+			{
+				ghost->first = (ghost->first-1)%HEIGHT;
+				ghost->second = ghost->second;
+				moved = 1;
+			}
+			break;
+		case 'a':
+			if(game_template[ghost->first][(ghost->second-1)%WIDTH]!='*')
+			{
+				ghost->first = ghost->first;
+				ghost->second = (ghost->second-1)%WIDTH;
+				moved = 1;
+			}
+			break;
+		case 's':
+			if(game_template[(ghost->first+1)%HEIGHT][ghost->second]!='*')
+			{
+				ghost->first = (ghost->first+1)%HEIGHT;
+				ghost->second = ghost->second;
+				moved = 1;
+			}
+			break;
+		case 'd':
+			if(game_template[ghost->first][(ghost->second+1)%WIDTH]!='*')
+			{
+				ghost->first = ghost->first;
+				ghost->second = (ghost->second+1)%WIDTH;
+				moved = 1;
+			}
+			break;
+		case 27://<ESQ>
+		case 'q':
+			endwin();
+			delete_graph(graph);
+			exit(0);
 	}
+}
 
-	// If some position to walk was found...
-	if(best_position.first!=0)
-		*ghost = best_position;
+void draw_game_over(WINDOW *win)
+{
+	wattr_on(win, COLOR_PAIR(PAIR_GAME_OVER), NULL);
+	for(int y=0;y<HEIGHT_GAME_OVER;y++)
+	{
+		mvwprintw(win, y, 0, game_over[y]);
+	}
+	wattr_off(win, COLOR_PAIR(PAIR_GAME_OVER), NULL);
+	wrefresh(win);
+	usleep(2*1000000);
+}
+
+void draw_help(WINDOW *win)
+{
+	wattr_on(win, COLOR_PAIR(PAIR_HELP), NULL);
+	for(int y=0;y<HEIGHT_HELP;y++)
+	{
+		mvwprintw(win, y, 0, help_template[y]);
+	}
+	wattr_off(win, COLOR_PAIR(PAIR_HELP), NULL);
+	wrefresh(win);
 }
