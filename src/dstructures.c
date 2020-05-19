@@ -106,6 +106,8 @@ void reset_iter_list(LIST* this_list)
 
 void* iter_list(LIST* this_list)
 {
+    if (this_list == NULL || this_list->internal_array == NULL) return NULL;
+
     if (this_list->iter_pos >= this_list->size)
     {
 	reset_iter_list(this_list);

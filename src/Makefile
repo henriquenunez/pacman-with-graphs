@@ -10,7 +10,7 @@ OBJ_DIR=${ROOT_DIR}/obj
 NC_ROOT_DIR=${OBJ_DIR}/ncurses-6.2
 
 #GENERAL TARGETS
-all: bin_dir build
+all: dirs build
 
 clean:
 	rm -rf ${NC_ROOT_DIR} || true
@@ -20,7 +20,7 @@ clean:
 build: graph.o main
 	#gcc ${CFLAGS} *.c ${LDFLAGS} -L ${NC_LIB_DIR}
 
-bin_dir:
+dirs:
 	mkdir ${BIN_DIR} || true
 	mkdir ${OBJ_DIR} || true
 	mkdir ${NC_ROOT_DIR} || true
@@ -35,7 +35,7 @@ run:
 
 #Tests
 
-tests:\
+tests: 	dirs\
 	dstructures.o\
 	graph.o\
 	build_test_dstructures\

@@ -1,5 +1,6 @@
 #include <curses.h>
 #include <unistd.h>
+<<<<<<< HEAD
 #include <stdio.h>
 
 #include "graph.h"
@@ -12,6 +13,9 @@
 #define COLOR_BLUE 2
 #define COLOR_YELLOW 3
 #define COLOR_RED 4
+=======
+#include "graph.c"
+>>>>>>> master
 
 // Curses pairs
 #define PAIR_BACKGROUND 1
@@ -41,6 +45,7 @@ void move_pacman(GRAPH *graph, PAIR *pacman);
 void move_ghost(GRAPH *graph, PAIR *ghost);
 
 int main(int argc, char *argv[]) {
+<<<<<<< HEAD
 	//--- Initilize game variables ---//
 	char game_running = 1;
 	PAIR ghost = {WIDTH/2, HEIGHT/2};
@@ -71,6 +76,29 @@ int main(int argc, char *argv[]) {
 	}
 
 	// Destroy the window
+=======
+	//--- Initialize curses ---//
+	initscr();
+	noecho();
+	curs_set(FALSE);
+
+	//--- Create game window ---//
+	int maxX=0, maxY=0;
+	// Get window size 
+	getmaxyx(stdscr, maxY, maxX);
+	// Create window (posY, posX, offsetY, offsetX)
+	WINDOW *game  = newwin(SIZE, SIZE, maxY/2-SIZE/2, maxX/2-SIZE/2);
+	refresh();
+
+	//--- Create graph ---//
+	GRAPH *graph = create_graph(SIZE, SIZE);
+
+	//--- Game loop ---//
+	drawGraph(game);
+	usleep(1*1000000);	
+
+	// Destroy curses window
+>>>>>>> master
 	endwin();
 	delete_graph(graph);
 
@@ -110,12 +138,17 @@ void setup_curses()
 void draw_game(WINDOW *win, GRAPH *graph, PAIR pacman, PAIR ghost)
 {
 	int x,y;
-	// Limpa janela
+	// Clear window
 	wclear(win);
 
+<<<<<<< HEAD
 	// Draw game template
 	wattr_on(win, COLOR_PAIR(PAIR_WALL), NULL);
 	for(x=0;x<WIDTH;x++)
+=======
+	// Draw board
+	for(x=0;x<SIZE;x++)
+>>>>>>> master
 	{
 		for(y=0;y<HEIGHT;y++)
 		{
@@ -149,7 +182,7 @@ void draw_game(WINDOW *win, GRAPH *graph, PAIR pacman, PAIR ghost)
 	mvwprintw(win, pacman.second, pacman.first, "o");
 	wattr_off(win, COLOR_PAIR(PAIR_PACMAN), NULL);
 	
-	// Atualiza a janela
+	// Refresh window 
 	wrefresh(win);
 }
 
