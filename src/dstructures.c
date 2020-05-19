@@ -50,9 +50,9 @@ void append_element_list(LIST* this_list, void* this_element)
     //In case we're out of space
     if(this_list->size+1 > this_list->capacity)
     {
-	this_list->internal_array = realloc(this_list->internal_array,
-				    (this_list->capacity + 10 * sizeof(void*)));
-	this_list->capacity+=10;
+		this_list->internal_array = realloc(this_list->internal_array,
+						(this_list->capacity + 10) * sizeof(void*));
+		this_list->capacity+=10;
     }
     //printf("INTERNAL ARRAY%p\n", this_list->internal_array);
     //printf("SIZE%d\n", this_list->size);
