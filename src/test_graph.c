@@ -2,27 +2,93 @@
 
 #include "graph.h"
 
-#define ROWS 5
-#define COLS 9
+const int ROWS = 5;
+const int COLS = 9;
+
+#define mod(a, b) ((a%b < 0) ? ((a%b) + b) : (a%b))
 
 int main()
 {
     GRAPH* a_graph;
-    PAIR temp_pair_0;
-    PAIR temp_pair_1;
-
-
-    //Source (0,0)
-    temp_pair_0.first = 0;
-    temp_pair_0.second = 0;
-    //Destination (1,1)
-    temp_pair_1.first = 1;
-    temp_pair_1.second = 1;
+    PAIR source, destination;
 
     a_graph = create_graph(ROWS, COLS);
-    insert_edge_graph(a_graph, temp_pair_0, temp_pair_1);
+
+    //Testing Initial graph
+    printf("Init graph:\n");
+    for (int i = 0 ; i < ROWS ; i++)
+    {
+	for (int j = 0 ; j < COLS ; j++)
+	{
+	    source.first = i; source.second = j;
+	    printf("%d ", value_at_vertex_graph(a_graph, source));
+	}
+	printf("\n");
+    }
+
+    printf("Creating edges\n");
+    for (int i = 0 ; i < ROWS ; i++)
+    {
+	for (int j = 0 ; j < COLS ; j++)
+	{
+	    source.first = i; source.second = j;
+
+	    //Up
+	    destination.first = (i - 1);
+	    destination.second = (j);
+	    destination.first = mod(destination.first, ROWS);
+	    destination.second = mod(destination.second, COLS);
+	    insert_edge_graph(a_graph, source, destination);
+
+	    //Left
+	    destination.first = (i) % ROWS;
+	    destination.second = (j - 1) % COLS;
+	    destination.first = mod(destination.first, ROWS);
+	    destination.second = mod(destination.second, COLS);
+	    insert_edge_graph(a_graph, source, destination);
+
+	    //Down
+	    destination.first = (i + 1) % ROWS;
+	    destination.second = (j) % COLS;
+	    destination.first = mod(destination.first, ROWS);
+	    destination.second = mod(destination.second, COLS);
+
+	    insert_edge_graph(a_graph, source, destination);
+
+	    //Right
+	    destination.first = (i) % ROWS;
+	    destination.second = (j + 1) % COLS;
+	    destination.first = mod(destination.first, ROWS);
+	    destination.second = mod(destination.second, COLS);
+
+	    insert_edge_graph(a_graph, source, destination);
+	}
+    }
+
+    source.first = 0; source.second = 0;
+    destination.first = (int) ROWS / 2; destination.second = (int) COLS / 2;
+
+    //Testing BFS
+    BFS_fill_distance_graph(a_graph, source, destination);
+
+    printf("After BFS:\n");
+
+    printf("    ");
+    for (int j = 0 ; j < COLS ; j++)
+	printf("%3d ", j);
+    printf("\n");
+
+    for (int i = 0 ; i < ROWS ; i++)
+    {
+	printf("%3d:", i);
+	for (int j = 0 ; j < COLS ; j++)
+	{
+	    source.first = i; source.second = j;
+	    printf("%3d ", value_at_vertex_graph(a_graph, source));
+	}
+	printf("\n");
+    }
+
     delete_graph(a_graph);
-
-
     return 0;
 }
