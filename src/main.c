@@ -2,6 +2,10 @@
 #include <unistd.h>
 #include "graph.c"
 
+#include "graph.h"
+
+#include <stdio.h>
+
 #define SIZE 5
 
 void drawGraph(WINDOW *win);
@@ -23,11 +27,20 @@ int main(int argc, char *argv[]) {
 	//--- Create graph ---//
 	GRAPH *graph = create_graph(SIZE, SIZE);
 
+<<<<<<< HEAD
 	//--- Game loop ---//
 	drawGraph(game);
 	usleep(1*1000000);	
 
 	// Destroy curses window
+=======
+	GRAPH* the_graph = create_graph(10,10);
+	printf("oi!");
+	delete_graph(the_graph);
+
+	usleep(1*1000000);
+	// Destroi a janela
+>>>>>>> master
 	endwin();
 	delete_graph(graph);
 

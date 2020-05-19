@@ -1,6 +1,8 @@
 #include "dstructures.h"
 
 #include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
 
 /*Implementation of simple data structures*/
 
@@ -26,13 +28,20 @@ LIST* create_list()
 {
     LIST* ret_list;
 
-    ret_list = (LIST*) malloc(sizeof(LIST));
+    ret_list = (LIST*) calloc(1, sizeof(LIST));
+
+    ret_list->internal_array = NULL;
+    ret_list->size = 0;
+    ret_list->iter_pos = 0;
+    ret_list->capacity = 0;
 
     return ret_list;
 }
 
 void delete_list(LIST* this_list)
 {
+    //Free internal array
+    free(this_list->internal_array);
     free(this_list);
 }
 
@@ -46,7 +55,8 @@ void append_element_list(LIST* this_list, void* this_element)
 						    sizeof(void*));
 	this_list->capacity+=10;
     }
-
+    //printf("INTERNAL ARRAY%p\n", this_list->internal_array);
+    //printf("SIZE%d\n", this_list->size);
     //Inserting in last position and updating size
     this_list->internal_array[this_list->size] = this_element;
     this_list->size++;
@@ -66,6 +76,29 @@ void* remove_last_element_list(LIST* this_list)
     return element;
 }
 
+void* remove_first_element_list(LIST* this_list)
+{
+    void* element;
+    void* temp_internal_array;
+
+    if (this_list->size <= 0) return NULL;
+
+    element = this_list->internal_array[0];
+    this_list->size--;
+
+    //Copies internal array from the next element until end.
+    temp_internal_array = malloc(this_list->capacity * sizeof(void*));
+    memcpy(temp_internal_array,
+	    this_list->internal_array + sizeof(void*),
+	    this_list->size);
+
+    free(this_list->internal_array);
+    //Repoints internal array to right place.
+    this_list->internal_array = temp_internal_array;
+
+    return element;
+}
+
 void reset_iter_list(LIST* this_list)
 {
     this_list->iter_pos = 0;
@@ -73,6 +106,8 @@ void reset_iter_list(LIST* this_list)
 
 void* iter_list(LIST* this_list)
 {
+    if (this_list == NULL || this_list->internal_array == NULL) return NULL;
+
     if (this_list->iter_pos >= this_list->size)
     {
 	reset_iter_list(this_list);
@@ -95,8 +130,15 @@ QUEUE* create_queue()
     ret_queue = (QUEUE*) malloc(sizeof(QUEUE));
 
     //Initialize list
+    ret_queue->internal_list = create_list();
 
     return ret_queue;
+}
+
+void delete_queue(QUEUE* this_queue)
+{
+    delete_list(this_queue->internal_list);
+    free(this_queue);
 }
 
 //Just wrappers for specific cases of lists
