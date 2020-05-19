@@ -1,7 +1,7 @@
 #include <curses.h>
 #include <unistd.h>
-<<<<<<< HEAD
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "graph.h"
 
@@ -9,13 +9,10 @@
 #define HEIGHT 15 
 
 // Curses colors
-#define COLOR_BLACK 1
-#define COLOR_BLUE 2
-#define COLOR_YELLOW 3
-#define COLOR_RED 4
-=======
-#include "graph.c"
->>>>>>> master
+#define GAME_COLOR_BLACK 1
+#define GAME_COLOR_BLUE 2
+#define GAME_COLOR_YELLOW 3
+#define GAME_COLOR_RED 4
 
 // Curses pairs
 #define PAIR_BACKGROUND 1
@@ -45,7 +42,6 @@ void move_pacman(GRAPH *graph, PAIR *pacman);
 void move_ghost(GRAPH *graph, PAIR *ghost);
 
 int main(int argc, char *argv[]) {
-<<<<<<< HEAD
 	//--- Initilize game variables ---//
 	char game_running = 1;
 	PAIR ghost = {WIDTH/2, HEIGHT/2};
@@ -76,29 +72,6 @@ int main(int argc, char *argv[]) {
 	}
 
 	// Destroy the window
-=======
-	//--- Initialize curses ---//
-	initscr();
-	noecho();
-	curs_set(FALSE);
-
-	//--- Create game window ---//
-	int maxX=0, maxY=0;
-	// Get window size 
-	getmaxyx(stdscr, maxY, maxX);
-	// Create window (posY, posX, offsetY, offsetX)
-	WINDOW *game  = newwin(SIZE, SIZE, maxY/2-SIZE/2, maxX/2-SIZE/2);
-	refresh();
-
-	//--- Create graph ---//
-	GRAPH *graph = create_graph(SIZE, SIZE);
-
-	//--- Game loop ---//
-	drawGraph(game);
-	usleep(1*1000000);	
-
-	// Destroy curses window
->>>>>>> master
 	endwin();
 	delete_graph(graph);
 
@@ -114,22 +87,22 @@ void setup_curses()
 
 	if (has_colors() == FALSE) {
 		endwin();
-		printf("Your terminal does not support colors\n");
+			printf("Your terminal does not support colors\n");
 		exit(1);
 	} 
 	start_color();
 
 	// Create colors
-	init_color(COLOR_BLACK, 200, 200, 200);
-	init_color(COLOR_RED, 1000, 0, 0);
-	init_color(COLOR_BLUE, 0, 0, 1000);
-	init_color(COLOR_YELLOW, 1000, 1000, 0);
+	init_color(GAME_COLOR_BLACK, 200, 200, 200);
+	init_color(GAME_COLOR_RED, 1000, 0, 0);
+	init_color(GAME_COLOR_BLUE, 0, 0, 1000);
+	init_color(GAME_COLOR_YELLOW, 1000, 1000, 0);
 
 	// Create pairs
-	init_pair(PAIR_BACKGROUND, COLOR_BLACK, COLOR_BLACK);	
-	init_pair(PAIR_WALL, COLOR_BLUE, COLOR_BLUE);	
-	init_pair(PAIR_PACMAN, COLOR_YELLOW, COLOR_BLACK);	
-	init_pair(PAIR_GHOST, COLOR_RED, COLOR_BLACK);	
+	init_pair(PAIR_BACKGROUND, GAME_COLOR_BLACK, GAME_COLOR_BLACK);	
+	init_pair(PAIR_WALL, GAME_COLOR_BLUE, GAME_COLOR_BLUE);	
+	init_pair(PAIR_PACMAN, GAME_COLOR_YELLOW, GAME_COLOR_BLACK);	
+	init_pair(PAIR_GHOST, GAME_COLOR_RED, GAME_COLOR_BLACK);	
 
 	// Set background color
 	bkgd(COLOR_PAIR(PAIR_BACKGROUND));
@@ -141,14 +114,9 @@ void draw_game(WINDOW *win, GRAPH *graph, PAIR pacman, PAIR ghost)
 	// Clear window
 	wclear(win);
 
-<<<<<<< HEAD
 	// Draw game template
 	wattr_on(win, COLOR_PAIR(PAIR_WALL), NULL);
 	for(x=0;x<WIDTH;x++)
-=======
-	// Draw board
-	for(x=0;x<SIZE;x++)
->>>>>>> master
 	{
 		for(y=0;y<HEIGHT;y++)
 		{

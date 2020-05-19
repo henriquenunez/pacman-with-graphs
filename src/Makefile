@@ -30,7 +30,7 @@ dirs:
 main:
 	$(CC) ${CFLAGS} main.c ${OBJ_DIR}/dstructures.o ${OBJ_DIR}/graph.o -o ${BIN_DIR}/pacman ${LDFLAGS}
 
-run:
+run: all
 	${BIN_DIR}/pacman
 
 #Tests
