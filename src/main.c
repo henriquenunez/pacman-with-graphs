@@ -5,6 +5,8 @@
 
 #include "graph.h"
 
+#define mod(a, b) (((a)%(b) < 0) ? (((a)%(b)) + (b)) : ((a)%(b)))
+
 // Game size
 #define WIDTH 30
 #define HEIGHT 15
@@ -36,21 +38,21 @@
 #include "super_secret_stuff.h"
 char easter_egg;
 
-char game_template[HEIGHT][WIDTH] ={{"******************************"},
+char game_template[HEIGHT][WIDTH] ={{"************* ** *************"},
 									{"*             **             *"},
 									{"* **** *** ******** *** **** *"},
 									{"* *                        * *"},
 									{"* * **********  ********** * *"},
 									{"*                            *"},
 									{"***** ***** **  ** ***** *****"},
-									{"*     *   * *    * *   *     *"},
+									{"      *   * *    * *   *      "},
 									{"***** ***** ****** ***** *****"},
 									{"*                            *"},
 									{"* * **********  ********** * *"},
 									{"* *                        * *"},
 									{"* **** *** ******** *** **** *"},
 									{"*             **             *"},
-									{"******************************"}};
+									{"************* ** *************"}};
 
 //char game_template[HEIGHT][WIDTH+1] ={{"******************************"},
 //								   	  {"*                            *"},
@@ -205,10 +207,10 @@ GRAPH* create_game_graph()
 			if(game_template[y][x]=='*')
 				continue;
 
-			PAIR positions_to_link[4] = {{curr.first, (curr.second-1)%WIDTH}, // Left
-										{(curr.first+1)%HEIGHT, curr.second}, // Bottom
-										{curr.first, (curr.second+1)%WIDTH},  // Right
-										{(curr.first-1)%HEIGHT, curr.second}};// Top
+			PAIR positions_to_link[4] = {{curr.first, mod(curr.second-1,WIDTH)}, // Left
+										{mod(curr.first+1,HEIGHT), curr.second}, // Bottom
+										{curr.first, mod(curr.second+1,WIDTH)},  // Right
+										{mod(curr.first-1,HEIGHT), curr.second}};// Top
 
 			for(int i=0;i<4;i++)
 			{
@@ -280,10 +282,10 @@ void move_pacman(GRAPH *graph, PAIR *pacman, PAIR ghost)
 	PAIR curr_checking;
 	int curr_bfs_value;
 
-	PAIR positions_to_check[4] = {{pacman->first, (pacman->second-1)%WIDTH},// Left
-								{(pacman->first+1)%HEIGHT, pacman->second},// Bottom
-								{pacman->first, (pacman->second+1)%WIDTH},// Right
-								{(pacman->first-1)%HEIGHT, pacman->second}};// Top
+	PAIR positions_to_check[4] = {{pacman->first, mod(pacman->second-1,WIDTH)},// Left
+								{mod(pacman->first+1,HEIGHT), pacman->second},// Bottom
+								{pacman->first, mod(pacman->second+1,WIDTH)},// Right
+								{mod(pacman->first-1,HEIGHT), pacman->second}};// Top
 	// Check best move
 	for(int i=0;i<4;i++)
 	{
@@ -314,17 +316,17 @@ void move_ghost(GRAPH *graph, PAIR *ghost, PAIR pacman)
 {
 	//------------- Control ghost with BFS ------------//
 	//BFS_reset_distance_graph(graph);
-	//BFS_fill_distance_graph(graph, *ghost, pacman);
+	//BFS_fill_distance_graph(graph, pacman, *ghost);
 	//// Values getting bigger from pacman to ghost -> choose higher number
 	//PAIR best_position = {-1,-1};
 	//int best_bfs_value = 0;
 	//PAIR curr_checking;
 	//int curr_bfs_value;
 
-	//PAIR positions_to_check[4] = {{ghost->first, (ghost->second-1)%WIDTH},// Left
-	//							{(ghost->first+1)%HEIGHT, ghost->second},// Top
-	//							{ghost->first, (ghost->second+1)%WIDTH},// Right
-	//							{(ghost->first-1)%HEIGHT, ghost->second}};// Bottom
+	//PAIR positions_to_check[4] = {{ghost->first, mod(ghost->second-1,WIDTH)},// Left
+	//							{mod(ghost->first+1,HEIGHT), ghost->second},// Top
+	//							{ghost->first, mod(ghost->second+1,WIDTH)},// Right
+	//							{mod(ghost->first-1,HEIGHT), ghost->second}};// Bottom
 
 	//for(int i=0;i<4;i++)
 	//{
@@ -341,42 +343,37 @@ void move_ghost(GRAPH *graph, PAIR *ghost, PAIR pacman)
 	//// If some position to walk was found...
 	//if(best_position.first!=0)
 	//	*ghost = best_position;
+
 	//------------- Control ghost with keyboard ------------//
-	int moved = 0;
-	int key;
-	key = getch();
+	int key = getch();
 	switch(key)
 	{
 		case 'k':
-			if(game_template[(ghost->first-1)%HEIGHT][ghost->second]!='*')
+			if(game_template[mod(ghost->first-1,HEIGHT)][ghost->second]!='*')
 			{
-				ghost->first = (ghost->first-1)%HEIGHT;
+				ghost->first = mod(ghost->first-1,HEIGHT);
 				ghost->second = ghost->second;
-				moved = 1;
 			}
 			break;
 		case 'h':
-			if(game_template[ghost->first][(ghost->second-1)%WIDTH]!='*')
+			if(game_template[ghost->first][mod(ghost->second-1,WIDTH)]!='*')
 			{
 				ghost->first = ghost->first;
-				ghost->second = (ghost->second-1)%WIDTH;
-				moved = 1;
+				ghost->second = mod(ghost->second-1,WIDTH);
 			}
 			break;
 		case 'j':
-			if(game_template[(ghost->first+1)%HEIGHT][ghost->second]!='*')
+			if(game_template[mod(ghost->first+1,HEIGHT)][ghost->second]!='*')
 			{
-				ghost->first = (ghost->first+1)%HEIGHT;
+				ghost->first = mod(ghost->first+1,HEIGHT);
 				ghost->second = ghost->second;
-				moved = 1;
 			}
 			break;
 		case 'l':
-			if(game_template[ghost->first][(ghost->second+1)%WIDTH]!='*')
+			if(game_template[ghost->first][mod(ghost->second+1,WIDTH)]!='*')
 			{
 				ghost->first = ghost->first;
-				ghost->second = (ghost->second+1)%WIDTH;
-				moved = 1;
+				ghost->second = mod(ghost->second+1,WIDTH);
 			}
 			break;
 		case 'F': //Nice stuff
