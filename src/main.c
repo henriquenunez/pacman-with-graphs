@@ -7,15 +7,15 @@
 
 // Game size
 #define WIDTH 30
-#define HEIGHT 15 
+#define HEIGHT 15
 
 // Game over size
 #define WIDTH_GAME_OVER 50
-#define HEIGHT_GAME_OVER 6 
+#define HEIGHT_GAME_OVER 6
 
-// Help size 
+// Help size
 #define WIDTH_HELP 18
-#define HEIGHT_HELP 11 
+#define HEIGHT_HELP 11
 
 // Curses colors
 #define GAME_COLOR_BLACK 1
@@ -32,6 +32,9 @@
 #define PAIR_GAME_OVER 5
 #define PAIR_NUMBERS 6
 #define PAIR_HELP 7
+
+#include "super_secret_stuff.h"
+char easter_egg;
 
 char game_template[HEIGHT][WIDTH] ={{"******************************"},
 									{"*             **             *"},
@@ -76,9 +79,9 @@ char game_over[HEIGHT_GAME_OVER][WIDTH_GAME_OVER+1] = {{"  __ _  __ _ _ __ ___  
 
 char help_template[HEIGHT_HELP][WIDTH_HELP] = {{"----- HELP -----"},
 					  {"Move ghost:     "},
-					  {"       w        "},
-					  {"     a   d      "},
-					  {"       s        "},
+					  {"       k        "},
+					  {"     h   l      "},
+					  {"       j        "},
 					  {"                "},
 					  {"Quit:           "},
 					  {"   <ESQ> or q   "},
@@ -127,17 +130,28 @@ int main(int argc, char *argv[]) {
 		move_ghost(graph, &ghost, pacman);
 		move_pacman(graph, &pacman, ghost);
 
+		if(easter_egg)
+		    game_running = 0;
+
 		if(pacman.first == ghost.first && pacman.second == ghost.second)
-			game_running = 0;
+		    game_running = 0;
 
 	}
 	draw_game(game, graph, pacman, ghost);
 
 	//--- Print game over ---//
-	WINDOW *game_over_window  = newwin(HEIGHT_GAME_OVER, WIDTH_GAME_OVER, maxY/2-HEIGHT_GAME_OVER/2-HEIGHT/2-3, maxX/2-WIDTH_GAME_OVER/2);
-	refresh();
-
-	draw_game_over(game_over_window);
+	if (easter_egg)
+	{
+	    WINDOW *egg_window  = newwin(HEIGHT_EASTER_EGG, WIDTH_EASTER_EGG, 0, maxX/2);
+	    refresh();
+	    draw_easter_egg(egg_window);
+	}
+	else
+	{
+	    WINDOW *game_over_window  = newwin(HEIGHT_GAME_OVER, WIDTH_GAME_OVER, maxY/2-HEIGHT_GAME_OVER/2-HEIGHT/2-3, maxX/2-WIDTH_GAME_OVER/2);
+	    refresh();
+	    draw_game_over(game_over_window);
+	}
 
 	// Destroy the window
 	endwin();
@@ -157,7 +171,7 @@ void setup_curses()
 		endwin();
 			printf("Your terminal does not support colors\n");
 		exit(1);
-	} 
+	}
 	start_color();
 
 	// Create colors
@@ -168,13 +182,13 @@ void setup_curses()
 	init_color(GAME_COLOR_YELLOW, 1000, 1000, 0);
 
 	// Create pairs
-	init_pair(PAIR_BACKGROUND, GAME_COLOR_BLACK, GAME_COLOR_BLACK);	
-	init_pair(PAIR_WALL, GAME_COLOR_BLUE, GAME_COLOR_BLUE);	
-	init_pair(PAIR_PACMAN, GAME_COLOR_YELLOW, GAME_COLOR_BLACK);	
-	init_pair(PAIR_GHOST, GAME_COLOR_RED, GAME_COLOR_BLACK);	
-	init_pair(PAIR_GAME_OVER, GAME_COLOR_RED, GAME_COLOR_BLACK);	
-	init_pair(PAIR_NUMBERS, GAME_COLOR_GRAY, GAME_COLOR_BLACK);	
-	init_pair(PAIR_HELP, GAME_COLOR_YELLOW, GAME_COLOR_BLACK);	
+	init_pair(PAIR_BACKGROUND, GAME_COLOR_BLACK, GAME_COLOR_BLACK);
+	init_pair(PAIR_WALL, GAME_COLOR_BLUE, GAME_COLOR_BLUE);
+	init_pair(PAIR_PACMAN, GAME_COLOR_YELLOW, GAME_COLOR_BLACK);
+	init_pair(PAIR_GHOST, GAME_COLOR_RED, GAME_COLOR_BLACK);
+	init_pair(PAIR_GAME_OVER, GAME_COLOR_RED, GAME_COLOR_BLACK);
+	init_pair(PAIR_NUMBERS, GAME_COLOR_GRAY, GAME_COLOR_BLACK);
+	init_pair(PAIR_HELP, GAME_COLOR_YELLOW, GAME_COLOR_BLACK);
 
 	// Set background color
 	bkgd(COLOR_PAIR(PAIR_BACKGROUND));
@@ -225,7 +239,7 @@ void draw_game(WINDOW *win, GRAPH *graph, PAIR pacman, PAIR ghost)
 	}
 	wattr_off(win, COLOR_PAIR(PAIR_WALL), NULL);
 
-	// Draw graph 
+	// Draw graph
 	wattr_on(win, COLOR_PAIR(PAIR_NUMBERS), NULL);
 	for(x=0;x<WIDTH;x++)
 	{
@@ -251,8 +265,8 @@ void draw_game(WINDOW *win, GRAPH *graph, PAIR pacman, PAIR ghost)
 	wattr_on(win, COLOR_PAIR(PAIR_PACMAN), NULL);
 	mvwprintw(win, pacman.first, pacman.second, "o");
 	wattr_off(win, COLOR_PAIR(PAIR_PACMAN), NULL);
-	
-	// Refresh window 
+
+	// Refresh window
 	wrefresh(win);
 }
 
@@ -333,7 +347,7 @@ void move_ghost(GRAPH *graph, PAIR *ghost, PAIR pacman)
 	key = getch();
 	switch(key)
 	{
-		case 'w':
+		case 'k':
 			if(game_template[(ghost->first-1)%HEIGHT][ghost->second]!='*')
 			{
 				ghost->first = (ghost->first-1)%HEIGHT;
@@ -341,7 +355,7 @@ void move_ghost(GRAPH *graph, PAIR *ghost, PAIR pacman)
 				moved = 1;
 			}
 			break;
-		case 'a':
+		case 'h':
 			if(game_template[ghost->first][(ghost->second-1)%WIDTH]!='*')
 			{
 				ghost->first = ghost->first;
@@ -349,7 +363,7 @@ void move_ghost(GRAPH *graph, PAIR *ghost, PAIR pacman)
 				moved = 1;
 			}
 			break;
-		case 's':
+		case 'j':
 			if(game_template[(ghost->first+1)%HEIGHT][ghost->second]!='*')
 			{
 				ghost->first = (ghost->first+1)%HEIGHT;
@@ -357,7 +371,7 @@ void move_ghost(GRAPH *graph, PAIR *ghost, PAIR pacman)
 				moved = 1;
 			}
 			break;
-		case 'd':
+		case 'l':
 			if(game_template[ghost->first][(ghost->second+1)%WIDTH]!='*')
 			{
 				ghost->first = ghost->first;
@@ -365,6 +379,9 @@ void move_ghost(GRAPH *graph, PAIR *ghost, PAIR pacman)
 				moved = 1;
 			}
 			break;
+		case 'F': //Nice stuff
+		    easter_egg = 1;
+		    break;
 		case 27://<ESQ>
 		case 'q':
 			endwin();
