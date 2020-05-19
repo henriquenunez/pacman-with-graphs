@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
 	printf("oi!");
 	delete_graph(the_graph);
 
-	usleep(1*1000000);	
+	usleep(1*1000000);
 	// Destroi a janela
 	endwin();
 

@@ -33,6 +33,28 @@ main:
 run:
 	${BIN_DIR}/pacman
 
+#Tests
+
+tests:\
+	dstructures.o\
+	graph.o\
+	build_test_dstructures\
+	run_test_dstructures\
+	build_test_graph\
+	run_test_graph
+
+build_test_dstructures:
+	$(CC) ${CFLAGS} test_dstructures.c ${OBJ_DIR}/dstructures.o -o ${BIN_DIR}/test_dstructures ${LDFLAGS}
+
+run_test_dstructures:
+	${BIN_DIR}/test_dstructures
+
+build_test_graph:
+	$(CC) ${CFLAGS} test_graph.c ${OBJ_DIR}/dstructures.o ${OBJ_DIR}/graph.o -o ${BIN_DIR}/test_graph ${LDFLAGS}
+
+run_test_graph:
+	${BIN_DIR}/test_graph
+
 #SPECIFIC TARGETS
 
 dstructures.o:

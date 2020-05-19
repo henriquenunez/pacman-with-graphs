@@ -1,11 +1,16 @@
 #ifndef DATA_STRUCTURES_H
 #define DATA_STRUCTURES_H
 
+#include <stdbool.h>
+
 /*Simple struct for holding pair of integers*/
 typedef struct _pair {
     int first;
     int second;
 } PAIR;
+
+#define create_pair ((PAIR*) malloc (sizeof(PAIR)))
+#define delete_pair(this_pair) (free(this_pair))
 
 //List
 typedef struct _list LIST;
@@ -29,6 +34,8 @@ void delete_queue(QUEUE*);
 
 void en_queue(QUEUE*, void*);
 void* de_queue(QUEUE*);
+
+//bool queue_empty;
 
 #endif
 
