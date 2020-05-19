@@ -1,30 +1,35 @@
 #include <curses.h>
 #include <unistd.h>
+#include "graph.c"
 
 #define SIZE 5
 
 void drawGraph(WINDOW *win);
 
 int main(int argc, char *argv[]) {
-	//--- Inicializa a janela ---//
+	//--- Initialize curses ---//
 	initscr();
 	noecho();
 	curs_set(FALSE);
 
-	//--- Cria janela do jogo ---//
+	//--- Create game window ---//
 	int maxX=0, maxY=0;
-	// Recebe tamanho da janela
+	// Get window size 
 	getmaxyx(stdscr, maxY, maxX);
-	// Cria janela (posY, posX, offsetY, offsetX)
+	// Create window (posY, posX, offsetY, offsetX)
 	WINDOW *game  = newwin(SIZE, SIZE, maxY/2-SIZE/2, maxX/2-SIZE/2);
 	refresh();
 
-	// Desenha grafo
-	drawGraph(game);
+	//--- Create graph ---//
+	GRAPH *graph = create_graph(SIZE, SIZE);
 
+	//--- Game loop ---//
+	drawGraph(game);
 	usleep(1*1000000);	
-	// Destroi a janela
+
+	// Destroy curses window
 	endwin();
+	delete_graph(graph);
 
 	return 0;
 }
@@ -32,10 +37,10 @@ int main(int argc, char *argv[]) {
 void drawGraph(WINDOW *win)
 {
 	int x,y;
-	// Limpa janela
+	// Clear window
 	wclear(win);
 
-	// Desenha grafo no centro da janela
+	// Draw board
 	for(x=0;x<SIZE;x++)
 	{
 		for(y=0;y<SIZE;y++)
@@ -44,6 +49,6 @@ void drawGraph(WINDOW *win)
 		}
 	}
 	
-	// Atualiza a janela
+	// Refresh window 
 	wrefresh(win);
 }
